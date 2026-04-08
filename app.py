@@ -1,4 +1,4 @@
-# app.py - Controle Financeiro (versão ajustada)
+# app.py - Controle Financeiro (versão ajustada) 232332
 import streamlit as st
 import pandas as pd
 from supabase_client import get_supabase
