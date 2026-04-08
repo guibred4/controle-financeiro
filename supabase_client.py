@@ -1,4 +1,3 @@
-# supabase_client.py
 from supabase import create_client, Client
 import os
 
