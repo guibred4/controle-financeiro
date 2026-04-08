@@ -10,9 +10,6 @@ import datetime
 supabase = get_supabase()
 st.set_page_config(page_title="Controle Financeiro", page_icon="💰", layout="wide")
 
-# ================================
-# LOGIN / CADASTRO
-# ================================
 if "user" not in st.session_state:
     st.title("💰 Controle Financeiro")
     st.subheader("Login / Cadastro")
@@ -39,18 +36,12 @@ if "user" not in st.session_state:
             st.write(e)
     st.stop()
 
-# ================================
-# LOGOUT
-# ================================
 st.sidebar.success("Logado como:")
 st.sidebar.write(st.session_state.user.email)
 if st.sidebar.button("Logout"):
     st.session_state.clear()
     st.experimental_rerun()
 
-# ================================
-# BUSCAR OU CRIAR GRUPO
-# ================================
 def buscar_grupo_usuario():
     user_id = st.session_state.user.id
 
@@ -83,15 +74,9 @@ if "grupo_id" not in st.session_state:
     st.session_state.grupo_id = buscar_grupo_usuario()
 grupo_id = st.session_state.grupo_id
 
-# ================================
-# MENU LATERAL / PÁGINAS
-# ================================
 pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Resumo / Gráficos"])
 data_inicio, data_fim = st.sidebar.date_input("Período", hoje_inicio_mes())
 
-# ================================
-# ADICIONAR DESPESA
-# ================================
 if pagina == "Adicionar Despesa":
     st.subheader("Adicionar Despesa")
     categorias = listar_categorias(grupo_id)
@@ -108,9 +93,6 @@ if pagina == "Adicionar Despesa":
             st.success("Despesa adicionada!")
             st.experimental_rerun()
 
-# ================================
-# RESUMO / GRÁFICOS
-# ================================
 elif pagina == "Resumo / Gráficos":
     st.subheader("Resumo de Despesas")
     despesas = listar_despesas(grupo_id, data_inicio, data_fim)
