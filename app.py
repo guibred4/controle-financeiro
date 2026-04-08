@@ -122,7 +122,7 @@ if pagina == "Adicionar Despesa":
         data = st.date_input("Data", value=datetime.date.today())
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            adicionar_despesa(grupo_id, descricao, valor, cat_options[categoria], str(data))  # converte date para string
+            adicionar_despesa(grupo_id, descricao, valor, cat_options[categoria], data)
             st.success("Despesa adicionada!")
 
 # ================================

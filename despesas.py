@@ -12,10 +12,15 @@ def listar_despesas(grupo_id, data_inicio=None, data_fim=None):
     return res.data
 
 def adicionar_despesa(grupo_id, descricao, valor, categoria_id, data):
+    if isinstance(data, str):
+        data_str = data
+    else:
+        data_str = data.strftime("%Y-%m-%d")
+
     supabase.table("despesas").insert({
         "descricao": descricao,
         "valor": valor,
         "categoria_id": categoria_id,
         "grupo_id": grupo_id,
-        "data": data.strftime("%Y-%m-%d")
+        "data": data_str
     }).execute()
