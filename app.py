@@ -45,6 +45,55 @@ st.markdown(
     .cashquest-hero p {
         margin: 0;
     }
+    .cashquest-login-card {
+        max-width: 530px;
+        margin: 0 auto 32px;
+        padding: 32px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        color: #0f172a;
+    }
+    .cashquest-login-card h1 {
+        margin-bottom: 0.4rem;
+        color: #0b3d91;
+    }
+    .cashquest-login-card p {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: #475569;
+    }
+    .cashquest-login-card input,
+    .cashquest-login-card textarea,
+    .cashquest-login-card select {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 14px !important;
+    }
+    .cashquest-login-card .stButton>button {
+        background: linear-gradient(135deg, #0b3d91, #2563eb) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 0.9rem 1.4rem !important;
+    }
+    .cashquest-login-card .stButton>button:hover {
+        filter: brightness(1.08) !important;
+    }
+    .cashquest-login-card .stTextInput>div>div>input {
+        padding: 1rem !important;
+    }
+    .cashquest-login-card .stDateInput>div>div>div>div {
+        background: #f8fafc !important;
+        border-radius: 14px !important;
+    }
+    @media(max-width: 768px) {
+        .cashquest-login-card {
+            padding: 24px;
+            margin: 0 16px 32px;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -80,6 +129,10 @@ if not st.session_state.logged_in:
     st.markdown("<div class='cashquest-hero'>", unsafe_allow_html=True)
     show_brand_header()
     st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='cashquest-login-card'>", unsafe_allow_html=True)
+    st.markdown("<h1>Login no CashQuest</h1>", unsafe_allow_html=True)
+    st.markdown("<p>Plataforma financeira com visual profissional, contraste forte e foco na sua jornada.</p>", unsafe_allow_html=True)
     st.subheader("Login / Cadastro")
 
     email = st.text_input("Email")
@@ -103,6 +156,7 @@ if not st.session_state.logged_in:
             st.error("Erro ao criar conta")
             st.write(e)
 
+    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()  # impede o resto do app até que o usuário logue
 
 # ================================
