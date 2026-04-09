@@ -7,7 +7,7 @@ def mostrar_graficos(df, categorias_dict):
 
     st.subheader("Despesas por Categoria")
     col_cards = st.columns(len(categorias_dict))
-    for i, (nome, cat_id) in enumerate(categorias_dict.items()):
+    for i, (cat_id, nome) in enumerate(categorias_dict.items()):
         total_cat = df[df["categoria_id"] == cat_id]["valor"].sum()
         col_cards[i].metric(f"{nome}", f"R$ {total_cat:,.2f}")
 
