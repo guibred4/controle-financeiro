@@ -21,7 +21,7 @@ def mostrar_graficos(df, categorias_dict):
             with cols[i % num_cols]:
                 st.metric(f"{cat}", f"R$ {total_cat:,.2f}", help=f"Total para {cat}")
 
-        fig1 = px.pie(df_despesas, names="categoria", values=df_despesas["valor"].abs(), title="Distribuição de Despesas por Categoria")
+        fig1 = px.pie(df_despesas, names="categoria", values=df_despesas["valor"].abs(), title="Distribuição de Despesas por Categoria - CashQuest")
         st.plotly_chart(fig1, use_container_width=True)
 
     if not df_receitas.empty:
@@ -31,14 +31,14 @@ def mostrar_graficos(df, categorias_dict):
         st.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
 
         # Gráfico simples para receitas (se houver variação, mas por enquanto placeholder)
-        fig3 = px.bar(df_receitas, x="data", y="valor", title="Receitas ao Longo do Tempo")
+        fig3 = px.bar(df_receitas, x="data", y="valor", title="Receitas ao Longo do Tempo - CashQuest")
         st.plotly_chart(fig3, use_container_width=True)
 
     df_time = df.groupby("data")["valor"].sum().reset_index()
-    fig2 = px.line(df_time, x="data", y="valor", title="Saldo ao Longo do Tempo", markers=True)
+    fig2 = px.line(df_time, x="data", y="valor", title="Saldo ao Longo do Tempo - CashQuest", markers=True)
     st.plotly_chart(fig2, use_container_width=True)
 
-    st.subheader("Tabela de Transações")
+    st.subheader("Tabela de Transações - CashQuest")
     # Limitar a 50 linhas para performance
     df_display = df.tail(50) if len(df) > 50 else df
     st.dataframe(df_display[["tipo", "descricao", "valor", "categoria", "data"]], use_container_width=True)

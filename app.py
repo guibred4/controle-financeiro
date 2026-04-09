@@ -1,4 +1,4 @@
-# app.py - Controle Financeiro (versão ajustada) 232332
+# CashQuest - Controle Financeiro Inteligente
 import streamlit as st
 import pandas as pd
 from supabase_client import get_supabase
@@ -18,7 +18,7 @@ def get_cached_categorias(grupo_id):
 # Configurações da página
 # ================================
 supabase = get_supabase()
-st.set_page_config(page_title="Controle Financeiro", page_icon="💰", layout="wide")
+st.set_page_config(page_title="CashQuest - Controle Financeiro", page_icon="💰", layout="wide")
 
 # ================================
 # Inicialização da sessão
@@ -34,7 +34,8 @@ if "logged_in" not in st.session_state:
 # LOGIN / CADASTRO
 # ================================
 if not st.session_state.logged_in:
-    st.title("💰 Controle Financeiro")
+    st.title("💰 CashQuest - Controle Financeiro Inteligente")
+    st.subheader("Gerencie suas finanças com facilidade e insights visuais.")
     st.subheader("Login / Cadastro")
 
     email = st.text_input("Email")
@@ -112,13 +113,13 @@ grupo_id = st.session_state.grupo_id
 # ================================
 pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Adicionar Receita", "Resumo / Gráficos"])
 st.sidebar.markdown("---")
-st.sidebar.info("💡 **Dicas**: Adicione despesas recorrentes para automatizar entradas mensais. Monitore seu saldo para evitar surpresas!")
+st.sidebar.info("💡 **Dicas do CashQuest**: Adicione despesas recorrentes para automatizar entradas mensais. Monitore seu saldo para evitar surpresas!")
 
 # ================================
 # ADICIONAR DESPESA
 # ================================
 if pagina == "Adicionar Despesa":
-    st.subheader("Adicionar Despesa")
+    st.subheader("Adicionar Despesa - CashQuest")
     categorias = get_cached_categorias(grupo_id)
     cat_options = {c["nome"]: c["id"] for c in categorias}
 
@@ -153,7 +154,7 @@ if pagina == "Adicionar Despesa":
 # ADICIONAR RECEITA
 # ================================
 elif pagina == "Adicionar Receita":
-    st.subheader("Adicionar Receita")
+    st.subheader("Adicionar Receita - CashQuest")
 
     with st.form("nova_receita"):
         descricao = st.text_input("Descrição", max_chars=100, help="Descrição da receita (máx. 100 caracteres)")
@@ -169,7 +170,7 @@ elif pagina == "Adicionar Receita":
                 adicionar_receita(grupo_id, descricao.strip(), valor, data)
                 st.success("Receita adicionada!")
 elif pagina == "Resumo / Gráficos":
-    st.subheader("Resumo Financeiro")
+    st.subheader("Resumo Financeiro - CashQuest")
     try:
         despesas = listar_despesas(grupo_id, data_inicio, data_fim)
         receitas = listar_receitas(grupo_id, data_inicio, data_fim)
