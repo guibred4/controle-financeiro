@@ -112,6 +112,7 @@ grupo_id = st.session_state.grupo_id
 # MENU LATERAL
 # ================================
 pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Adicionar Receita", "Resumo / Gráficos"])
+data_inicio, data_fim = st.sidebar.date_input("Período", hoje_inicio_mes())
 st.sidebar.markdown("---")
 st.sidebar.info("💡 **Dicas do CashQuest**: Adicione despesas recorrentes para automatizar entradas mensais. Monitore seu saldo para evitar surpresas!")
 
