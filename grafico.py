@@ -12,11 +12,14 @@ def mostrar_graficos(df, categorias_dict):
 
     if not df_despesas.empty:
         st.subheader("Despesas por Categoria")
-        col_cards = st.columns(len(categorias_dict))
-        for i, (cat_id, nome) in enumerate(categorias_dict.items()):
-            total_cat = df_despesas[df_despesas["categoria_id"] == cat_id]["valor"].sum()
-            if total_cat != 0:
-                col_cards[i].metric(f"{nome}", f"R$ {total_cat:,.2f}")
+        # Filtrar top 6 categorias por valor absoluto para evitar overflow
+        top_categorias = df_despesas.groupby("categoria")["valor"].sum().abs().nlargest(6).index
+        num_cols = min(len(top_categorias), 3)  # Máximo 3 colunas para melhor distribuição
+        cols = st.columns(num_cols)
+        for i, cat in enumerate(top_categorias):
+            total_cat = df_despesas[df_despesas["categoria"] == cat]["valor"].sum()
+            with cols[i % num_cols]:
+                st.metric(f"{cat}", f"R$ {total_cat:,.2f}", help=f"Total para {cat}")
 
         fig1 = px.pie(df_despesas, names="categoria", values=df_despesas["valor"].abs(), title="Distribuição de Despesas por Categoria")
         st.plotly_chart(fig1, use_container_width=True)
@@ -36,4 +39,6 @@ def mostrar_graficos(df, categorias_dict):
     st.plotly_chart(fig2, use_container_width=True)
 
     st.subheader("Tabela de Transações")
-    st.dataframe(df[["tipo", "descricao", "valor", "categoria", "data"]])
+    # Limitar a 50 linhas para performance
+    df_display = df.tail(50) if len(df) > 50 else df
+    st.dataframe(df_display[["tipo", "descricao", "valor", "categoria", "data"]], use_container_width=True)

@@ -9,6 +9,11 @@ from grafico import mostrar_graficos
 from utils import hoje_inicio_mes
 import datetime
 
+# Cache para categorias (dados estáticos)
+@st.cache_data(ttl=300)  # Cache por 5 minutos
+def get_cached_categorias(grupo_id):
+    return listar_categorias(grupo_id)
+
 # ================================
 # Configurações da página
 # ================================
@@ -106,37 +111,43 @@ grupo_id = st.session_state.grupo_id
 # MENU LATERAL
 # ================================
 pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Adicionar Receita", "Resumo / Gráficos"])
-data_inicio, data_fim = st.sidebar.date_input("Período", hoje_inicio_mes())
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Dicas**: Adicione despesas recorrentes para automatizar entradas mensais. Monitore seu saldo para evitar surpresas!")
 
 # ================================
 # ADICIONAR DESPESA
 # ================================
 if pagina == "Adicionar Despesa":
     st.subheader("Adicionar Despesa")
-    categorias = listar_categorias(grupo_id)
+    categorias = get_cached_categorias(grupo_id)
     cat_options = {c["nome"]: c["id"] for c in categorias}
 
     with st.form("nova_despesa"):
-        descricao = st.text_input("Descrição")
-        valor = st.number_input("Valor", min_value=0.0, step=0.01)
+        descricao = st.text_input("Descrição", max_chars=100, help="Descrição da despesa (máx. 100 caracteres)")
+        valor = st.number_input("Valor", min_value=0.01, step=0.01, help="Valor em reais")
         categoria = st.selectbox("Categoria", options=list(cat_options.keys()))
-        recorrente = st.checkbox("Despesa Recorrente (Mensal)")
+        recorrente = st.checkbox("Despesa Recorrente (Mensal)", help="Marque para despesas que se repetem mensalmente")
         
         if recorrente:
-            dia_do_mes = st.number_input("Dia do Mês", min_value=1, max_value=31, value=5)
-            data_inicio = st.date_input("Data de Início", value=datetime.date.today().replace(day=1))
-            data_fim = st.date_input("Data de Fim", value=datetime.date(2027, 1, 5))
+            dia_do_mes = st.number_input("Dia do Mês", min_value=1, max_value=31, value=5, help="Dia do mês para recorrência")
+            data_inicio = st.date_input("Data de Início", value=datetime.date.today().replace(day=1), help="Quando começa a recorrência")
+            data_fim = st.date_input("Data de Fim", value=datetime.date(2027, 1, 5), help="Quando termina a recorrência")
         else:
-            data = st.date_input("Data", value=datetime.date.today())
+            data = st.date_input("Data", value=datetime.date.today(), help="Data da despesa")
         
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            if recorrente:
-                adicionar_despesa_recorrente(grupo_id, descricao, valor, cat_options[categoria], dia_do_mes, data_inicio, data_fim)
-                st.success("Despesa recorrente adicionada!")
+            if valor <= 0:
+                st.error("Valor deve ser maior que zero.")
+            elif not descricao.strip():
+                st.error("Descrição não pode estar vazia.")
             else:
-                adicionar_despesa(grupo_id, descricao, valor, cat_options[categoria], data)
-                st.success("Despesa adicionada!")
+                if recorrente:
+                    adicionar_despesa_recorrente(grupo_id, descricao.strip(), valor, cat_options[categoria], dia_do_mes, data_inicio, data_fim)
+                    st.success("Despesa recorrente adicionada!")
+                else:
+                    adicionar_despesa(grupo_id, descricao.strip(), valor, cat_options[categoria], data)
+                    st.success("Despesa adicionada!")
 
 # ================================
 # ADICIONAR RECEITA
@@ -145,13 +156,18 @@ elif pagina == "Adicionar Receita":
     st.subheader("Adicionar Receita")
 
     with st.form("nova_receita"):
-        descricao = st.text_input("Descrição")
-        valor = st.number_input("Valor", min_value=0.0, step=0.01)
-        data = st.date_input("Data", value=datetime.date.today())
+        descricao = st.text_input("Descrição", max_chars=100, help="Descrição da receita (máx. 100 caracteres)")
+        valor = st.number_input("Valor", min_value=0.01, step=0.01, help="Valor em reais")
+        data = st.date_input("Data", value=datetime.date.today(), help="Data da receita")
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            adicionar_receita(grupo_id, descricao, valor, data)
-            st.success("Receita adicionada!")
+            if valor <= 0:
+                st.error("Valor deve ser maior que zero.")
+            elif not descricao.strip():
+                st.error("Descrição não pode estar vazia.")
+            else:
+                adicionar_receita(grupo_id, descricao.strip(), valor, data)
+                st.success("Receita adicionada!")
 elif pagina == "Resumo / Gráficos":
     st.subheader("Resumo Financeiro")
     despesas = listar_despesas(grupo_id, data_inicio, data_fim)
@@ -174,7 +190,7 @@ elif pagina == "Resumo / Gráficos":
         # Combinar
         df = pd.concat([df_despesas, df_receitas], ignore_index=True)
         if not df.empty:
-            categorias_dict = {c["id"]: c["nome"] for c in listar_categorias(grupo_id)}
+            categorias_dict = {c["id"]: c["nome"] for c in get_cached_categorias(grupo_id)}
             df["categoria"] = df.apply(lambda row: categorias_dict.get(row["categoria_id"], "Receita") if pd.notna(row.get("categoria_id")) else "Receita", axis=1)
 
             # Calcular totais
