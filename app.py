@@ -36,23 +36,27 @@ st.markdown(
         margin-bottom: 20px;
     }
     .cashquest-hero {
-        background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        background: #0f172a;
+        background-image: linear-gradient(135deg, #111827 0%, #1e293b 55%, #0f172a 100%);
+        border-radius: 32px;
+        padding: 32px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
         margin-bottom: 24px;
+        color: #ffffff;
     }
     .cashquest-hero p {
         margin: 0;
+        color: #cbd5e1;
     }
     .cashquest-login-card {
-        max-width: 530px;
+        max-width: 620px;
         margin: 0 auto 32px;
-        padding: 32px;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        padding: 36px;
+        border-radius: 32px;
+        background: #f8fafc;
+        box-shadow: 0 30px 90px rgba(15, 23, 42, 0.18);
         color: #0f172a;
+        border: 1px solid rgba(148, 163, 184, 0.25);
     }
     .cashquest-login-card h1 {
         margin-bottom: 0.4rem;
@@ -75,14 +79,33 @@ st.markdown(
         background: linear-gradient(135deg, #0b3d91, #2563eb) !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 14px !important;
-        padding: 0.9rem 1.4rem !important;
+        border-radius: 18px !important;
+        padding: 1rem 1.6rem !important;
+        font-weight: 600 !important;
     }
     .cashquest-login-card .stButton>button:hover {
-        filter: brightness(1.08) !important;
+        filter: brightness(1.12) !important;
     }
-    .cashquest-login-card .stTextInput>div>div>input {
-        padding: 1rem !important;
+    .cashquest-login-card .stTextInput>div>div>input,
+    .cashquest-login-card .stTextInput>div>div>textarea {
+        padding: 1rem 1.1rem !important;
+        border-radius: 14px !important;
+    }
+    .cashquest-login-card .stDateInput>div>div>div>div {
+        background: #f8fafc !important;
+        border-radius: 14px !important;
+        padding: 0.5rem !important;
+    }
+    .cashquest-login-card .stTextInput>label,
+    .cashquest-login-card .stDateInput>label {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+    .cashquest-login-card .stTextInput>div>div>input::placeholder {
+        color: #94a3b8 !important;
+    }
+    .cashquest-login-card .stButton>button:focus {
+        outline: 3px solid rgba(59, 130, 246, 0.32) !important;
     }
     .cashquest-login-card .stDateInput>div>div>div>div {
         background: #f8fafc !important;
@@ -101,12 +124,12 @@ st.markdown(
 
 
 def show_brand_header():
-    col1, col2 = st.columns([1, 4])
+    col1, col2 = st.columns([1, 5])
     with col1:
         try:
-            st.image("logo.png", width=100)
+            st.image("logo.png", width=140)
         except Exception:
-            st.markdown("<div style='font-size:48px'>💰</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size:72px; line-height: 0.9;'>💰</div>", unsafe_allow_html=True)
     with col2:
         st.markdown("<div class='cashquest-brand'>CashQuest</div>", unsafe_allow_html=True)
         st.markdown("<div class='cashquest-tagline'>Sua plataforma de finanças pessoais com visual profissional e foco em controle inteligente.</div>", unsafe_allow_html=True)
