@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from supabase_client import get_supabase
 from despesas import listar_despesas, adicionar_despesa, adicionar_despesa_recorrente
+from receitas import listar_receitas, adicionar_receita
 from categorias import listar_categorias
 from grafico import mostrar_graficos
 from utils import hoje_inicio_mes
@@ -104,7 +105,7 @@ grupo_id = st.session_state.grupo_id
 # ================================
 # MENU LATERAL
 # ================================
-pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Resumo / Gráficos"])
+pagina = st.sidebar.radio("Menu", ["Adicionar Despesa", "Adicionar Receita", "Resumo / Gráficos"])
 data_inicio, data_fim = st.sidebar.date_input("Período", hoje_inicio_mes())
 
 # ================================
@@ -138,18 +139,63 @@ if pagina == "Adicionar Despesa":
                 st.success("Despesa adicionada!")
 
 # ================================
-# RESUMO / GRÁFICOS
+# ADICIONAR RECEITA
 # ================================
+elif pagina == "Adicionar Receita":
+    st.subheader("Adicionar Receita")
+    categorias = listar_categorias(grupo_id)
+    cat_options = {c["nome"]: c["id"] for c in categorias}
+
+    with st.form("nova_receita"):
+        descricao = st.text_input("Descrição")
+        valor = st.number_input("Valor", min_value=0.0, step=0.01)
+        categoria = st.selectbox("Categoria", options=list(cat_options.keys()))
+        data = st.date_input("Data", value=datetime.date.today())
+        submitted = st.form_submit_button("Adicionar")
+        if submitted:
+            adicionar_receita(grupo_id, descricao, valor, cat_options[categoria], data)
+            st.success("Receita adicionada!")
 elif pagina == "Resumo / Gráficos":
-    st.subheader("Resumo de Despesas")
+    st.subheader("Resumo Financeiro")
     despesas = listar_despesas(grupo_id, data_inicio, data_fim)
+    receitas = listar_receitas(grupo_id, data_inicio, data_fim)
 
-    if despesas:
-        df = pd.DataFrame(despesas)
-        categorias_dict = {c["id"]: c["nome"] for c in listar_categorias(grupo_id)}
-        df["categoria"] = df["categoria_id"].map(categorias_dict)
-        df["valor"] = pd.to_numeric(df["valor"])
+    if despesas or receitas:
+        # Preparar DataFrame para despesas
+        df_despesas = pd.DataFrame(despesas) if despesas else pd.DataFrame()
+        if not df_despesas.empty:
+            df_despesas["tipo"] = "Despesa"
+            df_despesas["valor"] = -pd.to_numeric(df_despesas["valor"])  # Negativo para despesas
 
-        mostrar_graficos(df, categorias_dict)
+        # Preparar DataFrame para receitas
+        df_receitas = pd.DataFrame(receitas) if receitas else pd.DataFrame()
+        if not df_receitas.empty:
+            df_receitas["tipo"] = "Receita"
+            df_receitas["valor"] = pd.to_numeric(df_receitas["valor"])
+
+        # Combinar
+        df = pd.concat([df_despesas, df_receitas], ignore_index=True)
+        if not df.empty:
+            categorias_dict = {c["id"]: c["nome"] for c in listar_categorias(grupo_id)}
+            df["categoria"] = df["categoria_id"].map(categorias_dict)
+
+            # Calcular totais
+            total_receitas = df_receitas["valor"].sum() if not df_receitas.empty else 0
+            total_despesas = -df_despesas["valor"].sum() if not df_despesas.empty else 0  # Já negativo
+            saldo = total_receitas - total_despesas
+
+            # Métricas principais
+            col1, col2, col3 = st.columns(3)
+            col1.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
+            col2.metric("💸 Total Despesas", f"R$ {total_despesas:,.2f}")
+            if saldo >= 0:
+                col3.metric("📈 Saldo", f"R$ {saldo:,.2f}", delta=f"+R$ {saldo:,.2f}")
+            else:
+                col3.metric("📉 Saldo", f"R$ {saldo:,.2f}", delta=f"R$ {saldo:,.2f}")
+
+            # Gráficos
+            mostrar_graficos(df, categorias_dict)
+        else:
+            st.info("Nenhuma transação cadastrada neste período.")
     else:
-        st.info("Nenhuma despesa cadastrada neste período.")
+        st.info("Nenhuma transação cadastrada neste período.")
