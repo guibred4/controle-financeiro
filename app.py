@@ -20,9 +20,52 @@ def get_cached_categorias(grupo_id):
 supabase = get_supabase()
 st.set_page_config(page_title="CashQuest - Controle Financeiro", page_icon="💰", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    .cashquest-brand {
+        font-size: 42px;
+        font-weight: 800;
+        color: #0b3d91;
+        margin-bottom: 0px;
+    }
+    .cashquest-tagline {
+        font-size: 16px;
+        color: #334155;
+        margin-top: 0px;
+        margin-bottom: 20px;
+    }
+    .cashquest-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+    }
+    .cashquest-hero p {
+        margin: 0;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def show_brand_header():
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        try:
+            st.image("logo.png", width=100)
+        except Exception:
+            st.markdown("<div style='font-size:48px'>💰</div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<div class='cashquest-brand'>CashQuest</div>", unsafe_allow_html=True)
+        st.markdown("<div class='cashquest-tagline'>Sua plataforma de finanças pessoais com visual profissional e foco em controle inteligente.</div>", unsafe_allow_html=True)
+
 # ================================
 # Inicialização da sessão
 # ================================
+
 if "user" not in st.session_state:
     st.session_state.user = None
 if "grupo_id" not in st.session_state:
@@ -34,8 +77,9 @@ if "logged_in" not in st.session_state:
 # LOGIN / CADASTRO
 # ================================
 if not st.session_state.logged_in:
-    st.title("💰 CashQuest - Controle Financeiro Inteligente")
-    st.subheader("Gerencie suas finanças com facilidade e insights visuais.")
+    st.markdown("<div class='cashquest-hero'>", unsafe_allow_html=True)
+    show_brand_header()
+    st.markdown("</div>", unsafe_allow_html=True)
     st.subheader("Login / Cadastro")
 
     email = st.text_input("Email")
@@ -107,6 +151,11 @@ def buscar_grupo_usuario():
 if st.session_state.grupo_id is None:
     st.session_state.grupo_id = buscar_grupo_usuario()
 grupo_id = st.session_state.grupo_id
+
+# Branding principal
+st.markdown("<div class='cashquest-hero'>", unsafe_allow_html=True)
+show_brand_header()
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ================================
 # MENU LATERAL
