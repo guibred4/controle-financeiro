@@ -9,8 +9,8 @@ from grafico import mostrar_graficos
 from utils import hoje_inicio_mes
 import datetime
 
-# Cache para categorias (dados estáticos)
-@st.cache_data(ttl=300)  # Cache por 5 minutos
+# Cache para categorias (dados estáticos) - Temporariamente removido para debug
+# @st.cache_data(ttl=300)
 def get_cached_categorias(grupo_id):
     return listar_categorias(grupo_id)
 
@@ -170,46 +170,49 @@ elif pagina == "Adicionar Receita":
                 st.success("Receita adicionada!")
 elif pagina == "Resumo / Gráficos":
     st.subheader("Resumo Financeiro")
-    despesas = listar_despesas(grupo_id, data_inicio, data_fim)
-    receitas = listar_receitas(grupo_id, data_inicio, data_fim)
+    try:
+        despesas = listar_despesas(grupo_id, data_inicio, data_fim)
+        receitas = listar_receitas(grupo_id, data_inicio, data_fim)
 
-    if despesas or receitas:
-        # Preparar DataFrame para despesas
-        df_despesas = pd.DataFrame(despesas) if despesas else pd.DataFrame()
-        if not df_despesas.empty:
-            df_despesas["tipo"] = "Despesa"
-            df_despesas["valor"] = -pd.to_numeric(df_despesas["valor"])  # Negativo para despesas
+        if despesas or receitas:
+            # Preparar DataFrame para despesas
+            df_despesas = pd.DataFrame(despesas) if despesas else pd.DataFrame()
+            if not df_despesas.empty:
+                df_despesas["tipo"] = "Despesa"
+                df_despesas["valor"] = -pd.to_numeric(df_despesas["valor"])  # Negativo para despesas
 
-        # Preparar DataFrame para receitas
-        df_receitas = pd.DataFrame(receitas) if receitas else pd.DataFrame()
-        if not df_receitas.empty:
-            df_receitas["tipo"] = "Receita"
-            df_receitas["valor"] = pd.to_numeric(df_receitas["valor"])
-            df_receitas["categoria"] = "Receita"  # Placeholder, pois receitas não têm categoria
+            # Preparar DataFrame para receitas
+            df_receitas = pd.DataFrame(receitas) if receitas else pd.DataFrame()
+            if not df_receitas.empty:
+                df_receitas["tipo"] = "Receita"
+                df_receitas["valor"] = pd.to_numeric(df_receitas["valor"])
+                df_receitas["categoria"] = "Receita"  # Placeholder, pois receitas não têm categoria
 
-        # Combinar
-        df = pd.concat([df_despesas, df_receitas], ignore_index=True)
-        if not df.empty:
-            categorias_dict = {c["id"]: c["nome"] for c in get_cached_categorias(grupo_id)}
-            df["categoria"] = df.apply(lambda row: categorias_dict.get(row["categoria_id"], "Receita") if pd.notna(row.get("categoria_id")) else "Receita", axis=1)
+            # Combinar
+            df = pd.concat([df_despesas, df_receitas], ignore_index=True)
+            if not df.empty:
+                categorias_dict = {c["id"]: c["nome"] for c in get_cached_categorias(grupo_id)}
+                df["categoria"] = df.apply(lambda row: categorias_dict.get(row["categoria_id"], "Receita") if pd.notna(row.get("categoria_id")) else "Receita", axis=1)
 
-            # Calcular totais
-            total_receitas = df_receitas["valor"].sum() if not df_receitas.empty else 0
-            total_despesas = -df_despesas["valor"].sum() if not df_despesas.empty else 0  # Já negativo
-            saldo = total_receitas - total_despesas
+                # Calcular totais
+                total_receitas = df_receitas["valor"].sum() if not df_receitas.empty else 0
+                total_despesas = -df_despesas["valor"].sum() if not df_despesas.empty else 0  # Já negativo
+                saldo = total_receitas - total_despesas
 
-            # Métricas principais
-            col1, col2, col3 = st.columns(3)
-            col1.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
-            col2.metric("💸 Total Despesas", f"R$ {total_despesas:,.2f}")
-            if saldo >= 0:
-                col3.metric("📈 Saldo", f"R$ {saldo:,.2f}", delta=f"+R$ {saldo:,.2f}")
+                # Métricas principais
+                col1, col2, col3 = st.columns(3)
+                col1.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
+                col2.metric("💸 Total Despesas", f"R$ {total_despesas:,.2f}")
+                if saldo >= 0:
+                    col3.metric("📈 Saldo", f"R$ {saldo:,.2f}", delta=f"+R$ {saldo:,.2f}")
+                else:
+                    col3.metric("📉 Saldo", f"R$ {saldo:,.2f}", delta=f"R$ {saldo:,.2f}")
+
+                # Gráficos
+                mostrar_graficos(df, categorias_dict)
             else:
-                col3.metric("📉 Saldo", f"R$ {saldo:,.2f}", delta=f"R$ {saldo:,.2f}")
-
-            # Gráficos
-            mostrar_graficos(df, categorias_dict)
+                st.info("Nenhuma transação cadastrada neste período.")
         else:
             st.info("Nenhuma transação cadastrada neste período.")
-    else:
-        st.info("Nenhuma transação cadastrada neste período.")
+    except Exception as e:
+        st.error(f"Erro ao carregar dados: {str(e)}. Verifique as tabelas no Supabase.")

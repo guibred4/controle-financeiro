@@ -4,29 +4,34 @@ import datetime
 supabase = get_supabase()
 
 def listar_despesas(grupo_id, data_inicio=None, data_fim=None):
-    query = supabase.table("despesas").select("*").eq("grupo_id", grupo_id)
-    if data_inicio:
-        query = query.gte("data", str(data_inicio))
-    if data_fim:
-        query = query.lte("data", str(data_fim))
-    res = query.execute()
-    despesas = res.data
+    try:
+        query = supabase.table("despesas").select("*").eq("grupo_id", grupo_id)
+        if data_inicio:
+            query = query.gte("data", str(data_inicio))
+        if data_fim:
+            query = query.lte("data", str(data_fim))
+        res = query.execute()
+        despesas = res.data
 
-    # Incluir despesas recorrentes geradas
-    recorrentes = listar_despesas_recorrentes(grupo_id)
-    for rec in recorrentes:
-        datas = gerar_datas_recorrentes(rec, data_inicio, data_fim)
-        for data in datas:
-            despesas.append({
-                "id": f"rec_{rec['id']}_{data.strftime('%Y-%m-%d')}",
-                "descricao": rec["descricao"],
-                "valor": rec["valor"],
-                "categoria_id": rec["categoria_id"],
-                "grupo_id": grupo_id,
-                "data": data.strftime("%Y-%m-%d")
-            })
+        # Incluir despesas recorrentes geradas
+        recorrentes = listar_despesas_recorrentes(grupo_id)
+        for rec in recorrentes:
+            datas = gerar_datas_recorrentes(rec, data_inicio, data_fim)
+            for data in datas:
+                despesas.append({
+                    "id": f"rec_{rec['id']}_{data.strftime('%Y-%m-%d')}",
+                    "descricao": rec["descricao"],
+                    "valor": rec["valor"],
+                    "categoria_id": rec["categoria_id"],
+                    "grupo_id": grupo_id,
+                    "data": data.strftime("%Y-%m-%d")
+                })
 
-    return despesas
+        return despesas
+    except Exception as e:
+        # Log do erro e retorno vazio para evitar crash
+        print(f"Erro em listar_despesas: {e}")
+        return []
 
 def adicionar_despesa(grupo_id, descricao, valor, categoria_id, data):
     if isinstance(data, str):
