@@ -18,7 +18,7 @@ def mostrar_graficos(df, categorias_dict):
             if total_cat != 0:
                 col_cards[i].metric(f"{nome}", f"R$ {total_cat:,.2f}")
 
-        fig1 = px.pie(df_despesas, names="categoria", values="valor", title="Distribuição de Despesas por Categoria")
+        fig1 = px.pie(df_despesas, names="categoria", values=df_despesas["valor"].abs(), title="Distribuição de Despesas por Categoria")
         st.plotly_chart(fig1, use_container_width=True)
 
     if not df_receitas.empty:
