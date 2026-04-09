@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 from supabase_client import get_supabase
-from despesas import listar_despesas, adicionar_despesa
+from despesas import listar_despesas, adicionar_despesa, adicionar_despesa_recorrente
 from categorias import listar_categorias
 from grafico import mostrar_graficos
 from utils import hoje_inicio_mes
@@ -119,11 +119,23 @@ if pagina == "Adicionar Despesa":
         descricao = st.text_input("Descrição")
         valor = st.number_input("Valor", min_value=0.0, step=0.01)
         categoria = st.selectbox("Categoria", options=list(cat_options.keys()))
-        data = st.date_input("Data", value=datetime.date.today())
+        recorrente = st.checkbox("Despesa Recorrente (Mensal)")
+        
+        if recorrente:
+            dia_do_mes = st.number_input("Dia do Mês", min_value=1, max_value=31, value=5)
+            data_inicio = st.date_input("Data de Início", value=datetime.date.today().replace(day=1))
+            data_fim = st.date_input("Data de Fim", value=datetime.date(2027, 1, 5))
+        else:
+            data = st.date_input("Data", value=datetime.date.today())
+        
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            adicionar_despesa(grupo_id, descricao, valor, cat_options[categoria], data)
-            st.success("Despesa adicionada!")
+            if recorrente:
+                adicionar_despesa_recorrente(grupo_id, descricao, valor, cat_options[categoria], dia_do_mes, data_inicio, data_fim)
+                st.success("Despesa recorrente adicionada!")
+            else:
+                adicionar_despesa(grupo_id, descricao, valor, cat_options[categoria], data)
+                st.success("Despesa adicionada!")
 
 # ================================
 # RESUMO / GRÁFICOS
