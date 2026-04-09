@@ -43,8 +43,11 @@ def adicionar_despesa(grupo_id, descricao, valor, categoria_id, data):
     }).execute()
 
 def listar_despesas_recorrentes(grupo_id):
-    res = supabase.table("despesas_recorrentes").select("*").eq("grupo_id", grupo_id).execute()
-    return res.data
+    try:
+        res = supabase.table("despesas_recorrentes").select("*").eq("grupo_id", grupo_id).execute()
+        return res.data
+    except:
+        return []  # Tabela não existe ainda
 
 def adicionar_despesa_recorrente(grupo_id, descricao, valor, categoria_id, dia_do_mes, data_inicio, data_fim):
     supabase.table("despesas_recorrentes").insert({

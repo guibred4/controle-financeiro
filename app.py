@@ -143,17 +143,14 @@ if pagina == "Adicionar Despesa":
 # ================================
 elif pagina == "Adicionar Receita":
     st.subheader("Adicionar Receita")
-    categorias = listar_categorias(grupo_id)
-    cat_options = {c["nome"]: c["id"] for c in categorias}
 
     with st.form("nova_receita"):
         descricao = st.text_input("Descrição")
         valor = st.number_input("Valor", min_value=0.0, step=0.01)
-        categoria = st.selectbox("Categoria", options=list(cat_options.keys()))
         data = st.date_input("Data", value=datetime.date.today())
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            adicionar_receita(grupo_id, descricao, valor, cat_options[categoria], data)
+            adicionar_receita(grupo_id, descricao, valor, data)
             st.success("Receita adicionada!")
 elif pagina == "Resumo / Gráficos":
     st.subheader("Resumo Financeiro")
@@ -172,12 +169,13 @@ elif pagina == "Resumo / Gráficos":
         if not df_receitas.empty:
             df_receitas["tipo"] = "Receita"
             df_receitas["valor"] = pd.to_numeric(df_receitas["valor"])
+            df_receitas["categoria"] = "Receita"  # Placeholder, pois receitas não têm categoria
 
         # Combinar
         df = pd.concat([df_despesas, df_receitas], ignore_index=True)
         if not df.empty:
             categorias_dict = {c["id"]: c["nome"] for c in listar_categorias(grupo_id)}
-            df["categoria"] = df["categoria_id"].map(categorias_dict)
+            df["categoria"] = df.apply(lambda row: categorias_dict.get(row["categoria_id"], "Receita") if pd.notna(row.get("categoria_id")) else "Receita", axis=1)
 
             # Calcular totais
             total_receitas = df_receitas["valor"].sum() if not df_receitas.empty else 0

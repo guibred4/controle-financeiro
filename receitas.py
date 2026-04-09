@@ -11,7 +11,7 @@ def listar_receitas(grupo_id, data_inicio=None, data_fim=None):
     res = query.execute()
     return res.data
 
-def adicionar_receita(grupo_id, descricao, valor, categoria_id, data):
+def adicionar_receita(grupo_id, descricao, valor, data):
     if isinstance(data, str):
         data_str = data
     else:
@@ -20,7 +20,6 @@ def adicionar_receita(grupo_id, descricao, valor, categoria_id, data):
     supabase.table("receitas").insert({
         "descricao": descricao,
         "valor": valor,
-        "categoria_id": categoria_id,
         "grupo_id": grupo_id,
         "data": data_str
     }).execute()

@@ -23,7 +23,12 @@ def mostrar_graficos(df, categorias_dict):
 
     if not df_receitas.empty:
         st.subheader("Receitas por Categoria")
-        fig3 = px.pie(df_receitas, names="categoria", values="valor", title="Distribuição de Receitas por Categoria")
+        # Como receitas não têm categoria, mostrar total de receitas
+        total_receitas = df_receitas["valor"].sum()
+        st.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
+
+        # Gráfico simples para receitas (se houver variação, mas por enquanto placeholder)
+        fig3 = px.bar(df_receitas, x="data", y="valor", title="Receitas ao Longo do Tempo")
         st.plotly_chart(fig3, use_container_width=True)
 
     df_time = df.groupby("data")["valor"].sum().reset_index()
