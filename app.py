@@ -9,6 +9,8 @@ from cashquest.grafico import mostrar_graficos
 from cashquest.utils import hoje_inicio_mes
 import datetime
 
+st.set_page_config(page_title="CashQuest - Controle Financeiro", page_icon="💰", layout="wide")
+
 @st.cache_data(ttl=300, show_spinner=False)
 def get_cached_categorias(grupo_id):
     return listar_categorias(grupo_id)
@@ -71,6 +73,39 @@ def inject_styles():
             margin-bottom: 20px;
             color: #0f172a;
         }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(11, 61, 145, 0.08) 0%, rgba(37, 99, 235, 0.04) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            border-radius: 22px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.06);
+        }
+        .metric-card .metric-value {
+            font-size: 36px;
+            font-weight: 900;
+            color: #0b3d91;
+            margin: 12px 0;
+        }
+        .metric-card .metric-label {
+            font-size: 15px;
+            color: #475569;
+            font-weight: 600;
+        }
+        .metric-card.positive {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(74, 222, 128, 0.04) 100%);
+            border-color: rgba(74, 222, 128, 0.24);
+        }
+        .metric-card.positive .metric-value {
+            color: #22c55e;
+        }
+        .metric-card.negative {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(248, 113, 113, 0.04) 100%);
+            border-color: rgba(248, 113, 113, 0.24);
+        }
+        .metric-card.negative .metric-value {
+            color: #ef4444;
+        }
         .cashquest-card .stButton>button {
             background: linear-gradient(135deg, #0b3d91, #2563eb) !important;
             color: #ffffff !important;
@@ -94,9 +129,30 @@ def inject_styles():
             color: #0f172a !important;
             font-weight: 700 !important;
         }
+        .onboarding-box {
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+            border-radius: 24px;
+            padding: 32px;
+            color: #ffffff;
+            margin-bottom: 28px;
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+        }
+        .onboarding-box h3 {
+            margin-top: 0;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .onboarding-box p {
+            margin: 0;
+            font-size: 16px;
+            color: #dbeafe;
+            line-height: 1.7;
+        }
         @media(max-width: 768px) {
             .cashquest-hero,
-            .cashquest-card {
+            .cashquest-card,
+            .onboarding-box {
                 padding: 24px;
             }
         }
@@ -118,6 +174,96 @@ def show_brand_header():
         st.markdown("<div class='cashquest-tagline'>Controle financeiro pessoal com design profissional, usabilidade clara e foco em resultados.</div>", unsafe_allow_html=True)
 
 
+def render_metric_card(label, value, tipo="neutro"):
+    """Renderiza um card de métrica com estilo visual."""
+    class_name = "metric-card " + ("positive" if tipo == "positivo" else "negative" if tipo == "negativo" else "")
+    st.markdown(f"""
+        <div class="{class_name}">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value">{value}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+
+def show_onboarding_dashboard(nome_usuario):
+    """Exibe um dashboard de onboarding para novos usuários."""
+    st.markdown("""
+        <div class="onboarding-box">
+            <h3>👋 Bem-vindo ao CashQuest!</h3>
+            <p>Que bom ter você conosco! Este é seu espaço para controlar suas finanças de forma simples e inteligente.</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+            <div class="metric-card">
+                <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
+                <div class="metric-label" style="color: #0f172a; font-weight: 700;">Passo 1</div>
+                <div style="font-size: 14px; color: #64748b; margin-top: 8px;">Adicione suas despesas e receitas</div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="metric-card">
+                <div style="font-size: 32px; margin-bottom: 8px;">📈</div>
+                <div class="metric-label" style="color: #0f172a; font-weight: 700;">Passo 2</div>
+                <div style="font-size: 14px; color: #64748b; margin-top: 8px;">Visualize seus gráficos e relatórios</div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+            <div class="metric-card">
+                <div style="font-size: 32px; margin-bottom: 8px;">💡</div>
+                <div class="metric-label" style="color: #0f172a; font-weight: 700;">Passo 3</div>
+                <div style="font-size: 14px; color: #64748b; margin-top: 8px;">Tome decisões financeiras melhores</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+
+def render_summary_dashboard(total_receitas, total_despesas, saldo, despesas, receitas):
+    """Renderiza o painel de resumo com cards visuais."""
+    st.markdown("<h2 style='color: #0f172a; margin-bottom: 24px;'>📊 Seu Resumo Financeiro</h2>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        render_metric_card("Total de Receitas", f"R$ {total_receitas:,.2f}", "positivo")
+    with col2:
+        render_metric_card("Total de Despesas", f"R$ {total_despesas:,.2f}", "negativo")
+    with col3:
+        tipo_saldo = "positivo" if saldo >= 0 else "negativo"
+        render_metric_card("Saldo", f"R$ {saldo:,.2f}", tipo_saldo)
+    
+    st.markdown("---")
+    st.markdown("<h3 style='color: #0f172a; margin-top: 24px; margin-bottom: 18px;'>📉 Análise Detalhada</h3>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if despesas:
+            despesas_por_cat = {}
+            for d in despesas:
+                cat = d.get('nome', 'Sem categoria')
+                val = float(d.get('valor', 0))
+                despesas_por_cat[cat] = despesas_por_cat.get(cat, 0) + val
+            
+            st.markdown("<div class='cashquest-card' style='background: rgba(239, 68, 68, 0.02);'>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #0f172a;'>💸 Top Despesas por Categoria</h4>", unsafe_allow_html=True)
+            sorted_despesas = sorted(despesas_por_cat.items(), key=lambda x: x[1], reverse=True)[:5]
+            for cat, val in sorted_despesas:
+                st.write(f"**{cat}**: R$ {val:,.2f}")
+            st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col2:
+        if receitas:
+            st.markdown("<div class='cashquest-card' style='background: rgba(34, 197, 94, 0.02);'>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #0f172a;'>💰 Resumo de Receitas</h4>", unsafe_allow_html=True)
+            st.write(f"**Total de entradas**: {len(receitas)}")
+            st.write(f"**Média por receita**: R$ {total_receitas / len(receitas):,.2f}" if len(receitas) > 0 else "Sem receitas")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+
 def send_password_reset(email):
     try:
         supabase.auth.reset_password_email(email)
@@ -127,7 +273,6 @@ def send_password_reset(email):
 
 
 def build_auth_page():
-    inject_styles()
     st.markdown("<div class='cashquest-hero'>", unsafe_allow_html=True)
     show_brand_header()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -198,7 +343,19 @@ def build_auth_page():
 
 # ================================
 # Configurações da página
-# ================================
+
+supabase = get_supabase()
+inject_styles()
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+if "grupo_id" not in st.session_state:
+    st.session_state.grupo_id = None
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    build_auth_page()
 
 # ================================
 # SIDEBAR
@@ -320,7 +477,10 @@ elif pagina == "Resumo / Gráficos":
         despesas = listar_despesas(grupo_id, data_inicio, data_fim)
         receitas = listar_receitas(grupo_id, data_inicio, data_fim)
 
-        if despesas or receitas:
+        if not despesas and not receitas:
+            st.info("Nenhuma transação cadastrada neste período.")
+            show_onboarding_dashboard(st.session_state.user.email.split("@")[0])
+        else:
             # Preparar DataFrame para despesas
             df_despesas = pd.DataFrame(despesas) if despesas else pd.DataFrame()
             if not df_despesas.empty:
@@ -345,20 +505,14 @@ elif pagina == "Resumo / Gráficos":
                 total_despesas = -df_despesas["valor"].sum() if not df_despesas.empty else 0  # Já negativo
                 saldo = total_receitas - total_despesas
 
-                # Métricas principais
-                col1, col2, col3 = st.columns(3)
-                col1.metric("💰 Total Receitas", f"R$ {total_receitas:,.2f}")
-                col2.metric("💸 Total Despesas", f"R$ {total_despesas:,.2f}")
-                if saldo >= 0:
-                    col3.metric("📈 Saldo", f"R$ {saldo:,.2f}", delta=f"+R$ {saldo:,.2f}")
-                else:
-                    col3.metric("📉 Saldo", f"R$ {saldo:,.2f}", delta=f"R$ {saldo:,.2f}")
-
+                # Renderizar dashboard visual
+                render_summary_dashboard(total_receitas, total_despesas, saldo, despesas, receitas)
+                
                 # Gráficos
+                st.markdown("---")
+                st.markdown("<h3 style='color: #0f172a; margin-top: 24px;'>📈 Gráficos e Análises</h3>", unsafe_allow_html=True)
                 mostrar_graficos(df, categorias_dict)
             else:
                 st.info("Nenhuma transação cadastrada neste período.")
-        else:
-            st.info("Nenhuma transação cadastrada neste período.")
     except Exception as e:
         st.error(f"Erro ao carregar dados: {str(e)}. Verifique as tabelas no Supabase.")

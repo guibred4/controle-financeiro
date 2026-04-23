@@ -6,6 +6,7 @@ Um SaaS moderno para gestão financeira pessoal e familiar, com foco em simplici
 - Adição de receitas e despesas (incluindo recorrentes mensais)
 - Categorias personalizáveis
 - Relatórios e gráficos interativos
+- Recuperação de senha por email
 - Controle de saldo em tempo real
 - Suporte a múltiplos usuários por grupo
 
