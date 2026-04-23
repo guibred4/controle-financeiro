@@ -9,191 +9,196 @@ from cashquest.grafico import mostrar_graficos
 from cashquest.utils import hoje_inicio_mes
 import datetime
 
-# Cache para categorias (dados estáticos) - Temporariamente removido para debug
-# @st.cache_data(ttl=300)
+@st.cache_data(ttl=300, show_spinner=False)
 def get_cached_categorias(grupo_id):
     return listar_categorias(grupo_id)
 
-# ================================
-# Configurações da página
-# ================================
-supabase = get_supabase()
-st.set_page_config(page_title="CashQuest - Controle Financeiro", page_icon="💰", layout="wide")
 
-st.markdown(
-    """
-    <style>
-    .cashquest-brand {
-        font-size: 42px;
-        font-weight: 800;
-        color: #0b3d91;
-        margin-bottom: 0px;
-    }
-    .cashquest-tagline {
-        font-size: 16px;
-        color: #334155;
-        margin-top: 0px;
-        margin-bottom: 20px;
-    }
-    .cashquest-hero {
-        background: #0f172a;
-        background-image: linear-gradient(135deg, #111827 0%, #1e293b 55%, #0f172a 100%);
-        border-radius: 32px;
-        padding: 32px;
-        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
-        margin-bottom: 24px;
-        color: #ffffff;
-    }
-    .cashquest-hero p {
-        margin: 0;
-        color: #cbd5e1;
-    }
-    .cashquest-login-card {
-        max-width: 560px;
-        margin: 0 auto 32px;
-        padding: 28px 32px;
-        border-radius: 32px;
-        background: #f8fafc;
-        box-shadow: 0 30px 90px rgba(15, 23, 42, 0.18);
-        color: #0f172a;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-    .cashquest-login-card::before {
-        content: "";
-        display: block;
-        width: 72px;
-        height: 6px;
-        margin-bottom: 24px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #0b3d91, #2563eb);
-    }
-    .cashquest-login-card h1 {
-        margin-bottom: 0.3rem;
-        color: #0b3d91;
-        font-size: 32px;
-        line-height: 1.1;
-    }
-    .cashquest-login-card p {
-        margin-top: 0;
-        margin-bottom: 1.4rem;
-        color: #475569;
-        font-size: 15px;
-    }
-    .cashquest-login-card input,
-    .cashquest-login-card textarea,
-    .cashquest-login-card select {
-        background: #f8fafc !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 14px !important;
-    }
-    .cashquest-login-card .stButton>button {
-        background: linear-gradient(135deg, #0b3d91, #2563eb) !important;
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: 18px !important;
-        padding: 0.95rem 1.5rem !important;
-        font-weight: 700 !important;
-    }
-    .cashquest-login-card .stButton>button:hover {
-        filter: brightness(1.08) !important;
-    }
-    .cashquest-login-card .stTextInput>div>div>input,
-    .cashquest-login-card .stTextInput>div>div>textarea {
-        padding: 0.65rem 0.95rem !important;
-        border-radius: 14px !important;
-        min-height: 42px !important;
-    }
-    .cashquest-login-card .stDateInput>div>div>div>div {
-        background: #f8fafc !important;
-        border-radius: 14px !important;
-        padding: 0.35rem !important;
-    }
-    .cashquest-login-card .stTextInput>label,
-    .cashquest-login-card .stDateInput>label {
-        color: #0f172a !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
-    }
-    .cashquest-login-card .stTextInput>div>div>input::placeholder {
-        color: #94a3b8 !important;
-    }
-    .cashquest-login-card .stButton>button:focus {
-        outline: 3px solid rgba(59, 130, 246, 0.32) !important;
-    }
-    .cashquest-login-card .stDateInput>div>div>div>div {
-        background: #f8fafc !important;
-        border-radius: 14px !important;
-    }
-    @media(max-width: 768px) {
-        .cashquest-login-card {
-            padding: 24px;
-            margin: 0 16px 32px;
+def inject_styles():
+    st.markdown(
+        """
+        <style>
+        body {
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
         }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+        .cashquest-brand {
+            font-size: 48px;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0;
+        }
+        .cashquest-tagline {
+            font-size: 17px;
+            color: #475569;
+            margin-top: 8px;
+            margin-bottom: 0;
+            max-width: 660px;
+        }
+        .cashquest-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+            border-radius: 32px;
+            padding: 36px;
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.20);
+            margin-bottom: 32px;
+            color: #ffffff;
+        }
+        .cashquest-hero p {
+            margin: 0;
+            color: #dbeafe;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .cashquest-card {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 28px;
+            box-shadow: 0 22px 70px rgba(15, 23, 42, 0.12);
+            padding: 30px;
+            margin-bottom: 28px;
+        }
+        .cashquest-card h2 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+        .cashquest-card p {
+            color: #475569;
+        }
+        .cashquest-info-box {
+            background: rgba(59, 130, 246, 0.08);
+            border-left: 4px solid #2563eb;
+            padding: 18px 22px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+        .cashquest-card .stButton>button {
+            background: linear-gradient(135deg, #0b3d91, #2563eb) !important;
+            color: #ffffff !important;
+            border-radius: 16px !important;
+            padding: 1rem 1.5rem !important;
+            font-weight: 700 !important;
+        }
+        .cashquest-card .stButton>button:hover {
+            filter: brightness(1.08) !important;
+        }
+        .cashquest-card .stTextInput>div>div>input,
+        .cashquest-card .stTextInput>div>div>textarea,
+        .cashquest-card .stDateInput>div>div>div>div,
+        .cashquest-card .stSelectbox>div>div>select {
+            border-radius: 14px !important;
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        .cashquest-card .stTextInput>label,
+        .cashquest-card .stDateInput>label {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        @media(max-width: 768px) {
+            .cashquest-hero,
+            .cashquest-card {
+                padding: 24px;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_brand_header():
-    col1, col2 = st.columns([1, 5])
+    col1, col2 = st.columns([1, 3])
     with col1:
         try:
-            st.image("logo.png", width=180)
+            st.image("logo.png", width=160)
         except Exception:
-            st.markdown("<div style='font-size:90px; line-height: 0.9;'>💰</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size:72px; line-height: 0.85;'>💰</div>", unsafe_allow_html=True)
     with col2:
         st.markdown("<div class='cashquest-brand'>CashQuest</div>", unsafe_allow_html=True)
-        st.markdown("<div class='cashquest-tagline'>Sua plataforma de finanças pessoais com visual profissional e foco em controle inteligente.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='cashquest-tagline'>Controle financeiro pessoal com design profissional, usabilidade clara e foco em resultados.</div>", unsafe_allow_html=True)
 
-# ================================
-# Inicialização da sessão
-# ================================
 
-if "user" not in st.session_state:
-    st.session_state.user = None
-if "grupo_id" not in st.session_state:
-    st.session_state.grupo_id = None
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+def send_password_reset(email):
+    try:
+        supabase.auth.reset_password_email(email)
+        return True, "Enviamos um link de redefinição de senha para o seu email. Verifique sua caixa de entrada e spam."
+    except Exception as error:
+        return False, f"Não foi possível enviar o email de recuperação: {error}"
 
-# ================================
-# LOGIN / CADASTRO
-# ================================
-if not st.session_state.logged_in:
+
+def build_auth_page():
+    inject_styles()
     st.markdown("<div class='cashquest-hero'>", unsafe_allow_html=True)
     show_brand_header()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='cashquest-login-card'>", unsafe_allow_html=True)
-    st.markdown("<h1>Login no CashQuest</h1>", unsafe_allow_html=True)
-    st.markdown("<p>Plataforma financeira com visual profissional, contraste forte e foco na sua jornada.</p>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("<div class='cashquest-card'>", unsafe_allow_html=True)
+        st.markdown("<h2>Bem-vindo ao CashQuest</h2>", unsafe_allow_html=True)
+        st.markdown("<p>Entre ou crie sua conta com segurança. Caso precise, recupere sua senha em poucos cliques.</p>", unsafe_allow_html=True)
 
-    email = st.text_input("Email")
-    senha = st.text_input("Senha", type="password")
-    col1, col2 = st.columns(2)
+        tab_login, tab_signup, tab_recover = st.tabs(["Entrar", "Criar conta", "Recuperar senha"])
 
-    if col1.button("Login"):
-        try:
-            resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
-            st.session_state.user = resposta.user
-            st.session_state.logged_in = True
-        except Exception as e:
-            st.error("Login inválido")
-            st.write(e)
+        with tab_login:
+            with st.form("login_form"):
+                email = st.text_input("Email", placeholder="seu@exemplo.com")
+                senha = st.text_input("Senha", type="password", placeholder="••••••••")
+                submitted = st.form_submit_button("Entrar")
+                if submitted:
+                    if not email.strip() or not senha.strip():
+                        st.error("Por favor, preencha email e senha.")
+                    else:
+                        try:
+                            resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
+                            st.session_state.user = resposta.user
+                            st.session_state.logged_in = True
+                            st.experimental_rerun()
+                        except Exception as e:
+                            st.error("Falha no login. Verifique suas credenciais.")
+                            st.write(e)
 
-    if col2.button("Criar conta"):
-        try:
-            supabase.auth.sign_up({"email": email, "password": senha})
-            st.success("Conta criada! Faça login.")
-        except Exception as e:
-            st.error("Erro ao criar conta")
-            st.write(e)
+        with tab_signup:
+            with st.form("signup_form"):
+                email = st.text_input("Email", key="signup_email", placeholder="seu@exemplo.com")
+                senha = st.text_input("Senha", type="password", key="signup_password", placeholder="••••••••")
+                confirmacao = st.text_input("Confirme a senha", type="password", key="signup_confirm", placeholder="••••••••")
+                submitted = st.form_submit_button("Criar conta")
+                if submitted:
+                    if not email.strip() or not senha.strip() or not confirmacao.strip():
+                        st.error("Preencha todos os campos para criar sua conta.")
+                    elif senha != confirmacao:
+                        st.error("As senhas não coincidem.")
+                    else:
+                        try:
+                            supabase.auth.sign_up({"email": email, "password": senha})
+                            st.success("Conta criada com sucesso! Verifique seu email para confirmar.")
+                        except Exception as e:
+                            st.error("Não foi possível criar a conta.")
+                            st.write(e)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.stop()  # impede o resto do app até que o usuário logue
+        with tab_recover:
+            st.markdown("<div class='cashquest-info-box'>Insira o email cadastrado para receber um link de redefinição de senha.</div>", unsafe_allow_html=True)
+            with st.form("recover_form"):
+                email = st.text_input("Email de recuperação", key="recover_email", placeholder="seu@exemplo.com")
+                submitted = st.form_submit_button("Enviar link de recuperação")
+                if submitted:
+                    if not email.strip():
+                        st.error("Digite um email válido para recuperação.")
+                    else:
+                        success, message = send_password_reset(email.strip())
+                        if success:
+                            st.success(message)
+                        else:
+                            st.error(message)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.stop()
+
+
+# ================================
+# Configurações da página
+# ================================
 
 # ================================
 # SIDEBAR
