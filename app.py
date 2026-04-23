@@ -1,12 +1,12 @@
 # CashQuest - Controle Financeiro Inteligente
 import streamlit as st
 import pandas as pd
-from supabase_client import get_supabase
-from despesas import listar_despesas, adicionar_despesa, adicionar_despesa_recorrente
-from receitas import listar_receitas, adicionar_receita
-from categorias import listar_categorias
-from grafico import mostrar_graficos
-from utils import hoje_inicio_mes
+from cashquest.supabase_client import get_supabase
+from cashquest.despesas import listar_despesas, adicionar_despesa, adicionar_despesa_recorrente
+from cashquest.receitas import listar_receitas, adicionar_receita
+from cashquest.categorias import listar_categorias
+from cashquest.grafico import mostrar_graficos
+from cashquest.utils import hoje_inicio_mes
 import datetime
 
 # Cache para categorias (dados estáticos) - Temporariamente removido para debug
