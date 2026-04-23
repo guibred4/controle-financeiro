@@ -1,7 +1,7 @@
 # CashQuest - Controle Financeiro Inteligente
 import streamlit as st
 import pandas as pd
-from cashquest.supabase_client import get_supabase
+from cashquest.supabase_client import get_supabase, get_supabase_admin
 from cashquest.despesas import listar_despesas, adicionar_despesa, adicionar_despesa_recorrente
 from cashquest.receitas import listar_receitas, adicionar_receita
 from cashquest.categorias import listar_categorias
@@ -265,11 +265,32 @@ def render_summary_dashboard(total_receitas, total_despesas, saldo, despesas, re
 
 
 def send_password_reset(email):
+    """Envia email de recuperação de senha."""
+    import re
+    
+    # Validar formato de email
+    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+        return False, "Email inválido. Digite um email válido."
+    
     try:
-        supabase.auth.reset_password_email(email)
-        return True, "Enviamos um link de redefinição de senha para o seu email. Verifique sua caixa de entrada e spam."
+        # Tenta usar admin client com SERVICE_ROLE_KEY
+        admin = get_supabase_admin()
+        if admin:
+            admin.auth.admin_reset_password(email)
+            return True, "Enviamos um link de redefinição de senha para o seu email. Verifique sua caixa de entrada e spam."
+        else:
+            # Fallback: instruir usuário
+            return False, "Serviço de recuperação indisponível. Verifique se SUPABASE_SERVICE_ROLE_KEY está configurada."
     except Exception as error:
-        return False, f"Não foi possível enviar o email de recuperação: {error}"
+        error_str = str(error).lower()
+        if "not found" in error_str or "user_not_found" in error_str:
+            return False, "Email não encontrado na plataforma."
+        elif "connection" in error_str or "name or service not known" in error_str:
+            return False, "Erro de conexão. Verifique sua internet e as configurações do Supabase."
+        elif "unauthorized" in error_str:
+            return False, "Erro de autorização. Verifique as credenciais do Supabase."
+        else:
+            return False, f"Erro ao enviar email: {error}"
 
 
 def build_auth_page():
