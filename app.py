@@ -318,7 +318,7 @@ def build_auth_page():
                             resposta = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                             st.session_state.user = resposta.user
                             st.session_state.logged_in = True
-                            st.experimental_rerun()
+                            st.rerun()
                         except Exception as e:
                             st.error("Falha no login. Verifique suas credenciais.")
                             st.write(e)
